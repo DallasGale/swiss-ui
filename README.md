@@ -1,5 +1,6 @@
 # Swiss UI
 Work in progress!
 
+npm install
 
-Router example from https://github.com/vijitail/simple-javascript-router/blob/master/src/app.js
+parcel index.html
