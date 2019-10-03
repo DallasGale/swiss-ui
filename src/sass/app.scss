@@ -1,0 +1,21 @@
+@import './typography';
+
+/* Loading */
+@keyframes pageLoadAnimation {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.page {
+  display: block;
+  opacity: 0;
+  animation: pageLoadAnimation 2s forwards;
+  position: relative;
+  margin-top: 8rem;
+  z-index: 0;
+  padding: 1rem;
+}
