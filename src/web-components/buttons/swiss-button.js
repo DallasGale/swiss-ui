@@ -1,42 +1,39 @@
 import { siteTheme, themeTypes, colors } from '../../js/constants'
 import { colorPicker } from '../../js/helpers'
+import { setButtonBackground, setButtonBorderColor } from './_functions'
 
 const { accent } = siteTheme
 
+// * HTML Template
+const template = document.createElement('template')
+template.innerHTML = `
+	<button>button label</button>
+`
 
-class SwissButton extends HTMLButtonElement {
+
+class SwissButton extends HTMLElement {
 
 	constructor() {
 		super()
 
-		// ? CSS
-		const bs = this.style
-		const buttonType = this.getAttribute('type')
-		// todo Add to a functions file.
-		function buttonTheme() {
-			if (buttonType === themeTypes.accent.name) {
-				console.log('accent', themeTypes.accent)
-				return accent
-			}
-			// ...
-			if (buttonType === themeTypes.negative.name) {
-				console.log('negative', themeTypes.negative)
-				return colors.light
-			}
-			// ...
-			if (buttonType === themeTypes.positive.name) {
-				console.log('positive', themeTypes.positive)
-				return colors.dark
-			}
-		}
+		// * Assign template to a constant
+		const button = template.content.querySelector('button')
 
-		// * Theme
-		bs.background = buttonTheme()
+		// * Set label text
+		const label = this.textContent
+		button.textContent = label
+
+		// * Grab the 'theme' attr from the actual DOM wrapper element '<swiss-button'>
+		const buttonMode = this.getAttribute('mode')
+
+		// * Apply CSS
+		const bs = button.style
+		bs.background = setButtonBackground(buttonMode, accent)
 		bs.color = colorPicker(bs.background)
-
-
-		// * Default
-		bs.border = 0
+		bs.borderWidth = '3px'
+		bs.borderColor = setButtonBorderColor(siteTheme.mode, buttonMode, accent)
+		bs.borderStyle = 'solid'
+		bs.borderRadius = '0px'
 		bs.boxSizing = 'border-box'
 		bs.cursor = 'pointer'
 		bs.display = 'inline-block'
@@ -49,28 +46,26 @@ class SwissButton extends HTMLButtonElement {
 		bs.textTransform = 'uppercase'
 
 		// Dropdown content
-		this._hasDropdown = this.getAttribute('dropdown')
-		const icon = document.createElement('span')
-		const is = icon.style
-		is.alignItems = 'center'
-		is.display = 'flex'
-		is.fontSize = '1.2rem'
-		is.height = '100%'
-		is.justifyContent = 'center'
-		is.position = 'absolute'
-		is.right = '0.5rem'
-		is.transform = 'rotate(180deg)'
-		is.top = 0
-		is.width = '2rem'
-		icon.innerHTML = '&#9954'
+		// this._hasDropdown = this.getAttribute('dropdown')
+		// const icon = document.createElement('span')
+		// const is = icon.style
+		// is.alignItems = 'center'
+		// is.display = 'flex'
+		// is.fontSize = '1.2rem'
+		// is.height = '100%'
+		// is.justifyContent = 'center'
+		// is.position = 'absolute'
+		// is.right = '0.5rem'
+		// is.transform = 'rotate(180deg)'
+		// is.top = 0
+		// is.width = '2rem'
+		// icon.innerHTML = '&#9954'
 
-		if (this._hasDropdown) {
-			this.insertAdjacentElement('beforeend', icon)
-		}
+		// if (this._hasDropdown) {
+		// 	this.insertAdjacentElement('beforeend', icon)
+		// }
 
-		this.setAttribute('active', false)
-
-
+		// button.setAttribute('active', false)
 
 		// ? Event handlers
 		const defaultButtonBackground = bs.background
@@ -79,62 +74,90 @@ class SwissButton extends HTMLButtonElement {
 		const activeButtonColor = bs.background
 
 		this.addEventListener('focus', () => {
-			bs.background = activeButtonBackground
-			bs.color = activeButtonColor
+			const thisButton = this.shadowRoot.querySelector('button')
+			thisButton.style.background = activeButtonBackground
+			thisButton.style.color = activeButtonColor
 
-			if (this._hasDropdown) {
-				const iconEl = this.querySelector('span')
-				iconEl.style.transform = 'rotate(0deg)'
-				iconEl.style.transition = 'all 0.3s'
-			}
+			// if (this._hasDropdown) {
+			// 	const iconEl = this.querySelector('span')
+			// 	iconEl.style.transform = 'rotate(0deg)'
+			// 	iconEl.style.transition = 'all 0.3s'
+			// }
 		})
 
 		this.addEventListener('focusout', () => {
-			bs.background = defaultButtonBackground
-			bs.color = defaultButtonColor
+			const thisButton = this.shadowRoot.querySelector('button')
+			// console.log('focus out', thisButton)
+			thisButton.style.background = defaultButtonBackground
+			thisButton.style.color = defaultButtonColor
 
-			if (this._hasDropdown) {
-				const iconEl = this.querySelector('span')
-				iconEl.style.transform = 'rotate(180deg)'
-				iconEl.style.transition = 'all 0.3s'
-			}
+			// if (this._hasDropdown) {
+			// 	const iconEl = this.querySelector('span')
+			// 	iconEl.style.transform = 'rotate(180deg)'
+			// 	iconEl.style.transition = 'all 0.3s'
+			// }
 		})
 
-		this.addEventListener('mouseover', () => {
+		button.addEventListener('mouseover', () => {
 			bs.background = activeButtonBackground
 			bs.color = activeButtonColor
 
-			this.setAttribute('open', true)
-			this.setAttribute('active', true)
+			button.setAttribute('open', true)
+			button.setAttribute('active', true)
 
-			// Remove this 'cursor' as a dropdown
-			// shouldn't need a clickable parent button
-			if (this._hasDropdown) bs.cursor = 'default'
+			// ! Remove this 'cursor' as a dropdown
+			// ! shouldn't need a clickable parent button
+			// if (this._hasDropdown) bs.cursor = 'default'
 
 
-			if (this._hasDropdown) {
-				const iconEl = this.querySelector('span')
-				iconEl.style.transform = 'rotate(0deg)'
-				iconEl.style.transition = 'all 0.3s'
-			}
+			// if (this._hasDropdown) {
+			// 	const iconEl = this.querySelector('span')
+			// 	iconEl.style.transform = 'rotate(0deg)'
+			// 	iconEl.style.transition = 'all 0.3s'
+			// }
 		})
 
-		this.addEventListener('mouseout', () => {
+		button.addEventListener('mouseout', () => {
 			bs.background = defaultButtonBackground
 			bs.color = defaultButtonColor
 
-			this.setAttribute('open', false)
-			this.setAttribute('active', false)
+			button.setAttribute('open', false)
+			button.setAttribute('active', false)
 
-			if (this._hasDropdown) {
-				const iconEl = this.querySelector('span')
-				iconEl.style.transform = 'rotate(180deg)'
-				iconEl.style.transition = 'all 0.3s'
-			}
+			// if (this._hasDropdown) {
+			// 	const iconEl = this.querySelector('span')
+			// 	iconEl.style.transform = 'rotate(180deg)'
+			// 	iconEl.style.transition = 'all 0.3s'
+			// }
 		})
+
+
+
+
+		// ? Shadow DOM
+		const shadowRoot = this.attachShadow({ mode: 'open' })
+		shadowRoot.appendChild(template.content.cloneNode(true))
+
+
+		const config = {
+			attributes: true,
+		}
+		const body = document.querySelector('body')
+		const callback = (mutationsList) => {
+			for (let mutation of mutationsList) {
+				if (mutation.type === 'attributes') {
+					if (body.getAttribute('mode') === 'positive' && this.getAttribute('mode') === 'positive') {
+						this.shadowRoot.querySelector('button').style.borderColor = colors.light
+					}
+				}
+			}
+		}
+
+		const observer = new MutationObserver(callback)
+
+		observer.observe(body, config)
+
 	}
 }
 
-customElements.define('swiss-button', SwissButton, {
-	extends: 'button'
-})
+customElements.define('swiss-button', SwissButton)

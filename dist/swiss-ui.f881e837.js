@@ -127,20 +127,46 @@ exports.default = void 0;
 var _default = {
   theme: {
     //  The only color allowed.
-    accentColor: '#43aa53',
-    // Mode: 'brand, 'negative' or 'positive'
-    mode: 'positive',
-    // mode: 'negative',
-    // mode: 'brand',
+    accentColor: '#f6be1f',
+    // ? Mode: 'brand, 'negative' or 'positive'
+    mode: 'accent',
     // Font familty
     typography: {
-      fontFamily: {
-        isHelvetica: true
-      }
+      // ? User can overright default font here
+      fontFamily: 'arial'
     }
   }
 };
 exports.default = _default;
+},{}],"src/js/header.js":[function(require,module,exports) {
+var header = document.getElementById('site-header');
+var body = document.querySelector('body');
+header.innerHTML = 'Toggle Site Mode';
+var hs = header.style;
+hs.fontSize = '0.6rem';
+hs.position = 'fixed';
+hs.top = 0;
+hs.width = '100%';
+hs.padding = '1rem';
+hs.textAlign = 'right';
+hs.right = 0;
+var radios = "\n  <form>\n    <label for=\"radio-accent\">Accent\n    <input name=\"siteMode\" id=\"radio-accent\" type=\"radio\" value=\"Accent\" />\n    \n    <label for=\"radio-negative\">Negative\n    <input name=\"siteMode\" id=\"radio-negative\" type=\"radio\" value=\"Negative\" />\n\n    <label for=\"radio-positive\">Positive\n    <input name=\"siteMode\" id=\"radio-positive\" type=\"radio\" value=\"Positive\" />\n  </form>\n  ";
+header.insertAdjacentHTML('beforeend', radios);
+
+document.onreadystatechange = function () {
+  if (document.readyState === 'complete') {
+    var _radios = header.querySelectorAll('input'); // console.log(radios)
+
+
+    _radios.forEach(function (radio) {
+      // console.log(radio)
+      radio.addEventListener('click', function () {
+        // console.log(radio.value)
+        body.setAttribute('mode', radio.value.toLowerCase());
+      });
+    });
+  }
+};
 },{}],"src/js/helpers.js":[function(require,module,exports) {
 "use strict";
 
@@ -172,11 +198,11 @@ var colorPicker = function colorPicker(color) {
 
   hsp = Math.sqrt(0.299 * (r * r) + 0.587 * (g * g) + 0.114 * (b * b)); // Using the HSP value, determine whether the color is light or dark
 
-  if (hsp > 200) {
-    console.log('light', hsp);
+  if (hsp > 198) {
+    // console.log('light', hsp)
     return _constants.colors.dark;
   } else {
-    console.log('dark', hsp);
+    // console.log('dark', hsp)
     return _constants.colors.light;
   }
 };
@@ -188,7 +214,7 @@ exports.colorPicker = colorPicker;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.themeTypes = exports.siteTheme = exports.colors = void 0;
+exports.modeTypes = exports.siteTheme = exports.colors = void 0;
 
 var _helpers = require("./helpers");
 
@@ -206,7 +232,7 @@ var siteTheme = {
   mode: _swissConfig.default.theme.mode
 };
 exports.siteTheme = siteTheme;
-var themeTypes = {
+var modeTypes = {
   accent: {
     name: 'accent'
   },
@@ -218,36 +244,150 @@ var themeTypes = {
   } // ? Set global style to DOM
 
 };
-exports.themeTypes = themeTypes;
-var body = document.querySelector('body'); // todo Add to a functions file.
+exports.modeTypes = modeTypes;
+var body = document.querySelector('body'); // // todo Add to a functions file.
+// function handleTheme() {
+// 	if (siteTheme.mode === modeTypes.accent.name) {
+// 		return siteTheme.accent
+// 	}
+// 	// ...
+// 	if (siteTheme.mode === modeTypes.negative.name) {
+// 		// console.log('negative', modeTypes.negative)
+// 		return colors.light
+// 	}
+// 	// ...
+// 	if (siteTheme.mode === modeTypes.positive.name) {
+// 		// console.log('positive', modeTypes.positive)
+// 		return colors.dark
+// 	}
+// }
 
-function handleTheme() {
-  if (siteTheme.mode === themeTypes.accent.name) {
+function setBackgroundColor() {
+  if (body.getAttribute('mode') === 'accent') {
     return siteTheme.accent;
-  } // ...
+  }
 
-
-  if (siteTheme.mode === themeTypes.negative.name) {
-    console.log('negative', themeTypes.negative);
-    return colors.light;
-  } // ...
-
-
-  if (siteTheme.mode === themeTypes.positive.name) {
-    console.log('positive', themeTypes.positive);
+  if (body.getAttribute('mode') === 'positive') {
     return colors.dark;
   }
-} // todo body.style.background = colorPicker(themeChooser(siteTheme.mode))
+
+  if (body.getAttribute('mode') === 'negative') {
+    return colors.light;
+  }
+} // ? Obseve <body /> for mode attr changes and then re-render the
+// ?  page with Mutation Observer.
 
 
-body.style.background = handleTheme();
-body.style.color = (0, _helpers.colorPicker)(body.style.background);
-},{"./helpers":"src/js/helpers.js","~/swiss.config.js":"swiss.config.js"}],"src/web-components/buttons/swiss-button.js":[function(require,module,exports) {
+var config = {
+  attributes: true
+};
+
+var callback = function callback(mutationsList) {
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var mutation = _step.value;
+
+      if (mutation.type === 'attributes') {
+        body.style.background = setBackgroundColor();
+        body.style.color = (0, _helpers.colorPicker)(body.style.background); // console.log(`The ${mutation.attributeName} attribute was modified`)
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+};
+
+var observer = new MutationObserver(callback);
+observer.observe(body, config); // observe.disconnect()
+},{"./helpers":"src/js/helpers.js","~/swiss.config.js":"swiss.config.js"}],"src/web-components/buttons/_functions.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.setButtonBorderColor = exports.setButtonBackground = void 0;
+
+var _constants = require("../../js/constants");
+
+var _helpers = require("../../js/helpers");
+
+var setButtonBackground = function setButtonBackground(mode, accent) {
+  if (mode === _constants.modeTypes.accent.name) {
+    return accent;
+  }
+
+  if (mode === _constants.modeTypes.negative.name) {
+    return _constants.colors.light;
+  }
+
+  if (mode === _constants.modeTypes.positive.name) {
+    return _constants.colors.dark;
+  }
+};
+
+exports.setButtonBackground = setButtonBackground;
+
+var setButtonBorderColor = function setButtonBorderColor(siteMode, buttonMode, accent) {
+  // 1. If accent bg and accent button
+  if (siteMode === 'accent' && buttonMode === 'accent') {
+    var color = (0, _helpers.colorPicker)(accent);
+    return color;
+  } // 2. if accent bg and negative button
+
+
+  if (siteMode === 'accent' && buttonMode === 'negative') {
+    // console.log(buttonMode)
+    return _constants.colors.light;
+  } // 3. if accent bg and positive button
+
+
+  if (siteMode === 'accent' && buttonMode === 'positive') {
+    // console.log(buttonMode)
+    return _constants.colors.dark;
+  } // 4. If positive bg and positive button
+
+
+  if (siteMode === 'positive' && buttonMode === 'positive') {
+    var _color = (0, _helpers.colorPicker)(accent);
+
+    return _color;
+  } // if (siteMode === 'negative' && buttonMode === 'negative') {
+  // 	// console.log('siteMode', siteMode)
+  // 	return colors.negative
+  // }
+  // if (siteMode === 'positive' && buttonMode === 'positive') {
+  // 	return colors.positive
+  // }
+  // else {
+  // 	return buttonMode
+  // }
+
+};
+
+exports.setButtonBorderColor = setButtonBorderColor;
+},{"../../js/constants":"src/js/constants.js","../../js/helpers":"src/js/helpers.js"}],"src/web-components/buttons/swiss-button.js":[function(require,module,exports) {
 "use strict";
 
 var _constants = require("../../js/constants");
 
 var _helpers = require("../../js/helpers");
+
+var _functions = require("./_functions");
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -271,49 +411,38 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var accent = _constants.siteTheme.accent;
+var accent = _constants.siteTheme.accent; // * HTML Template
+
+var template = document.createElement('template');
+template.innerHTML = "\n\t<button>button label</button>\n";
 
 var SwissButton =
 /*#__PURE__*/
-function (_HTMLButtonElement) {
-  _inherits(SwissButton, _HTMLButtonElement);
+function (_HTMLElement) {
+  _inherits(SwissButton, _HTMLElement);
 
   function SwissButton() {
     var _this;
 
     _classCallCheck(this, SwissButton);
 
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(SwissButton).call(this)); // ? CSS
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(SwissButton).call(this)); // * Assign template to a constant
 
-    var bs = _this.style;
+    var button = template.content.querySelector('button'); // * Set label text
 
-    var buttonType = _this.getAttribute('type'); // todo Add to a functions file.
+    var label = _this.textContent;
+    button.textContent = label; // * Grab the 'theme' attr from the actual DOM wrapper element '<swiss-button'>
 
-
-    function buttonTheme() {
-      if (buttonType === _constants.themeTypes.accent.name) {
-        console.log('accent', _constants.themeTypes.accent);
-        return accent;
-      } // ...
+    var buttonMode = _this.getAttribute('mode'); // * Apply CSS
 
 
-      if (buttonType === _constants.themeTypes.negative.name) {
-        console.log('negative', _constants.themeTypes.negative);
-        return _constants.colors.light;
-      } // ...
-
-
-      if (buttonType === _constants.themeTypes.positive.name) {
-        console.log('positive', _constants.themeTypes.positive);
-        return _constants.colors.dark;
-      }
-    } // * Theme
-
-
-    bs.background = buttonTheme();
-    bs.color = (0, _helpers.colorPicker)(bs.background); // * Default
-
-    bs.border = 0;
+    var bs = button.style;
+    bs.background = (0, _functions.setButtonBackground)(buttonMode, accent);
+    bs.color = (0, _helpers.colorPicker)(bs.background);
+    bs.borderWidth = '3px';
+    bs.borderColor = (0, _functions.setButtonBorderColor)(_constants.siteTheme.mode, buttonMode, accent);
+    bs.borderStyle = 'solid';
+    bs.borderRadius = '0px';
     bs.boxSizing = 'border-box';
     bs.cursor = 'pointer';
     bs.display = 'inline-block';
@@ -324,28 +453,25 @@ function (_HTMLButtonElement) {
     bs.padding = '1.2rem 3rem';
     bs.position = 'relative';
     bs.textTransform = 'uppercase'; // Dropdown content
-
-    _this._hasDropdown = _this.getAttribute('dropdown');
-    var icon = document.createElement('span');
-    var is = icon.style;
-    is.alignItems = 'center';
-    is.display = 'flex';
-    is.fontSize = '1.2rem';
-    is.height = '100%';
-    is.justifyContent = 'center';
-    is.position = 'absolute';
-    is.right = '0.5rem';
-    is.transform = 'rotate(180deg)';
-    is.top = 0;
-    is.width = '2rem';
-    icon.innerHTML = '&#9954';
-
-    if (_this._hasDropdown) {
-      _this.insertAdjacentElement('beforeend', icon);
-    }
-
-    _this.setAttribute('active', false); // ? Event handlers
-
+    // this._hasDropdown = this.getAttribute('dropdown')
+    // const icon = document.createElement('span')
+    // const is = icon.style
+    // is.alignItems = 'center'
+    // is.display = 'flex'
+    // is.fontSize = '1.2rem'
+    // is.height = '100%'
+    // is.justifyContent = 'center'
+    // is.position = 'absolute'
+    // is.right = '0.5rem'
+    // is.transform = 'rotate(180deg)'
+    // is.top = 0
+    // is.width = '2rem'
+    // icon.innerHTML = '&#9954'
+    // if (this._hasDropdown) {
+    // 	this.insertAdjacentElement('beforeend', icon)
+    // }
+    // button.setAttribute('active', false)
+    // ? Event handlers
 
     var defaultButtonBackground = bs.background;
     var defaultButtonColor = bs.color;
@@ -353,75 +479,103 @@ function (_HTMLButtonElement) {
     var activeButtonColor = bs.background;
 
     _this.addEventListener('focus', function () {
-      bs.background = activeButtonBackground;
-      bs.color = activeButtonColor;
+      var thisButton = _this.shadowRoot.querySelector('button');
 
-      if (_this._hasDropdown) {
-        var iconEl = _this.querySelector('span');
-
-        iconEl.style.transform = 'rotate(0deg)';
-        iconEl.style.transition = 'all 0.3s';
-      }
+      thisButton.style.background = activeButtonBackground;
+      thisButton.style.color = activeButtonColor; // if (this._hasDropdown) {
+      // 	const iconEl = this.querySelector('span')
+      // 	iconEl.style.transform = 'rotate(0deg)'
+      // 	iconEl.style.transition = 'all 0.3s'
+      // }
     });
 
     _this.addEventListener('focusout', function () {
-      bs.background = defaultButtonBackground;
-      bs.color = defaultButtonColor;
+      var thisButton = _this.shadowRoot.querySelector('button'); // console.log('focus out', thisButton)
 
-      if (_this._hasDropdown) {
-        var iconEl = _this.querySelector('span');
 
-        iconEl.style.transform = 'rotate(180deg)';
-        iconEl.style.transition = 'all 0.3s';
-      }
+      thisButton.style.background = defaultButtonBackground;
+      thisButton.style.color = defaultButtonColor; // if (this._hasDropdown) {
+      // 	const iconEl = this.querySelector('span')
+      // 	iconEl.style.transform = 'rotate(180deg)'
+      // 	iconEl.style.transition = 'all 0.3s'
+      // }
     });
 
-    _this.addEventListener('mouseover', function () {
+    button.addEventListener('mouseover', function () {
       bs.background = activeButtonBackground;
       bs.color = activeButtonColor;
-
-      _this.setAttribute('open', true);
-
-      _this.setAttribute('active', true); // Remove this 'cursor' as a dropdown
-      // shouldn't need a clickable parent button
-
-
-      if (_this._hasDropdown) bs.cursor = 'default';
-
-      if (_this._hasDropdown) {
-        var iconEl = _this.querySelector('span');
-
-        iconEl.style.transform = 'rotate(0deg)';
-        iconEl.style.transition = 'all 0.3s';
-      }
+      button.setAttribute('open', true);
+      button.setAttribute('active', true); // ! Remove this 'cursor' as a dropdown
+      // ! shouldn't need a clickable parent button
+      // if (this._hasDropdown) bs.cursor = 'default'
+      // if (this._hasDropdown) {
+      // 	const iconEl = this.querySelector('span')
+      // 	iconEl.style.transform = 'rotate(0deg)'
+      // 	iconEl.style.transition = 'all 0.3s'
+      // }
     });
-
-    _this.addEventListener('mouseout', function () {
+    button.addEventListener('mouseout', function () {
       bs.background = defaultButtonBackground;
       bs.color = defaultButtonColor;
+      button.setAttribute('open', false);
+      button.setAttribute('active', false); // if (this._hasDropdown) {
+      // 	const iconEl = this.querySelector('span')
+      // 	iconEl.style.transform = 'rotate(180deg)'
+      // 	iconEl.style.transition = 'all 0.3s'
+      // }
+    }); // ? Shadow DOM
 
-      _this.setAttribute('open', false);
-
-      _this.setAttribute('active', false);
-
-      if (_this._hasDropdown) {
-        var iconEl = _this.querySelector('span');
-
-        iconEl.style.transform = 'rotate(180deg)';
-        iconEl.style.transition = 'all 0.3s';
-      }
+    var shadowRoot = _this.attachShadow({
+      mode: 'open'
     });
 
+    shadowRoot.appendChild(template.content.cloneNode(true));
+    var config = {
+      attributes: true
+    };
+    var body = document.querySelector('body');
+
+    var callback = function callback(mutationsList) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var mutation = _step.value;
+
+          if (mutation.type === 'attributes') {
+            if (body.getAttribute('mode') === 'positive' && _this.getAttribute('mode') === 'positive') {
+              _this.shadowRoot.querySelector('button').style.borderColor = _constants.colors.light;
+            }
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return != null) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    };
+
+    var observer = new MutationObserver(callback);
+    observer.observe(body, config);
     return _this;
   }
 
   return SwissButton;
-}(_wrapNativeSuper(HTMLButtonElement));
+}(_wrapNativeSuper(HTMLElement));
 
-customElements.define('swiss-button', SwissButton, {
-  extends: 'button'
-});
-},{"../../js/constants":"src/js/constants.js","../../js/helpers":"src/js/helpers.js"}],"src/web-components/buttons/nav_dropdown_item.js":[function(require,module,exports) {
+customElements.define('swiss-button', SwissButton);
+},{"../../js/constants":"src/js/constants.js","../../js/helpers":"src/js/helpers.js","./_functions":"src/web-components/buttons/_functions.js"}],"src/web-components/buttons/nav_dropdown_item.js":[function(require,module,exports) {
 "use strict";
 
 var _constants = require("../../js/constants");
@@ -500,7 +654,7 @@ require("./nav_dropdown_item");
 
 var section = document.getElementById('buttons');
 var elementName = section.id;
-section.innerHTML = "\n  <h2 class=\"typography__heading--one\">".concat(elementName, "</h2>\n  <div id='").concat(elementName, "-content'>\n    <button\n      is=\"swiss-button\"\n      type=\"accent\"\n    >\n      Accented\n    </button>\n\n    <button\n      is=\"swiss-button\"\n      type=\"positive\"\n    >\n      Positive\n    </button>\n    \n    <button\n      is=\"swiss-button\"\n      type=\"negative\"\n    >\n      Negative\n    </button>\n    \n  </div>\n  ");
+section.innerHTML = "\n  <h2 class=\"typography__heading--one\">".concat(elementName, "</h2>\n  <div id='").concat(elementName, "-content'>\n\n    <swiss-button mode=\"accent\">\n      Accented\n    </swiss-button>\n\n    <swiss-button mode=\"positive\">\n      Positive\n    </swiss-button>\n    \n    <swiss-button mode=\"negative\">\n      Negative\n    </swiss-button>\n  \n  </div>\n  ");
 },{"./swiss-button":"src/web-components/buttons/swiss-button.js","./nav_dropdown_item":"src/web-components/buttons/nav_dropdown_item.js"}],"src/web-components/nav-dropdown/index.js":[function(require,module,exports) {
 "use strict";
 
@@ -565,40 +719,19 @@ customElements.define('nav-dropdown', NavDropdown);
 
 var _swiss = _interopRequireDefault(require("../swiss.config"));
 
+require("./js/header");
+
 require("./web-components/buttons");
 
 require("./web-components/nav-dropdown");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-console.log('🇨🇭swiss-ui here'); // ? Import user settings config and assign them.
-
-var theme = _swiss.default.theme;
-var mode = theme.mode,
-    typography = theme.typography;
-var fontFamily = typography.fontFamily;
-var body = document.querySelector('body'); // todo Move to a functions file.
-
-function setFontFamily() {
-  if (fontFamily.isHelvetica) return 'helvetica, sans-serif';else 'inherit';
-}
-
-body.style.fontFamily = setFontFamily();
-body.setAttribute('mode', mode);
-
-if (body.getAttribute('mode') === 'positive') {
-  body.style.background;
-} // console.log(body)
-
-
-var main = document.querySelector('main');
-var title = document.title;
-var heading = "<h1>".concat(title, "</h1>");
-main.insertAdjacentHTML('beforebegin', "<h1>".concat(heading, "</h1>")); // Web Components - elements
-// import './web-components/site_logo/'
-// Buttons
-// Header
-// Navigation
+// ? Import user settings config and assign them.
+// ? Header
+// ? Buttons
+// ? Dropdown
+// ?Navigation
 // Grid
 // Side menu
 // Typography ... H1 -> H6
@@ -607,7 +740,30 @@ main.insertAdjacentHTML('beforebegin', "<h1>".concat(heading, "</h1>")); // Web 
 // Modals
 // Form fields
 // Branding
-},{"../swiss.config":"swiss.config.js","./web-components/buttons":"src/web-components/buttons/index.js","./web-components/nav-dropdown":"src/web-components/nav-dropdown/index.js"}],"../../../.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+var theme = _swiss.default.theme;
+var mode = theme.mode,
+    typography = theme.typography;
+var body = document.querySelector('body');
+body.style.fontFamily = setFontFamily(typography.fontFamily);
+body.setAttribute('mode', mode); // if (body.getAttribute('mode') === 'positive') {
+// 	body.style.background
+// }
+
+var main = document.querySelector('main');
+var title = document.title;
+var heading = "<h1>".concat(title, "</h1>");
+main.insertAdjacentHTML('beforebegin', "".concat(heading)); // ? Functions
+
+function setFontFamily(font) {
+  if (font === 'default') {
+    return 'helvetica, sans-serif';
+  } else if (font) {
+    return font;
+  } else {
+    return 'helvetica, sans-serif';
+  }
+}
+},{"../swiss.config":"swiss.config.js","./js/header":"src/js/header.js","./web-components/buttons":"src/web-components/buttons/index.js","./web-components/nav-dropdown":"src/web-components/nav-dropdown/index.js"}],"../../../.config/yarn/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -635,7 +791,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56792" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59424" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

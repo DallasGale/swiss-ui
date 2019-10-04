@@ -1,18 +1,15 @@
 export default {
 	theme: {
 		//  The only color allowed.
-		accentColor: '#43aa53',
+		accentColor: '#f6be1f',
 
-		// Mode: 'brand, 'negative' or 'positive'
-		mode: 'positive',
-		// mode: 'negative',
-		// mode: 'brand',
+		// ? Mode: 'brand, 'negative' or 'positive'
+		mode: 'accent',
 
 		// Font familty
 		typography: {
-			fontFamily: {
-				isHelvetica: true,
-			}
+			// ? User can overright default font here
+			fontFamily: 'arial'
 		},
 	}
 }

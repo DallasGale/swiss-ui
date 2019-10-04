@@ -33,12 +33,12 @@ export const colorPicker = (color) => {
 	)
 
 	// Using the HSP value, determine whether the color is light or dark
-	if (hsp > 200) {
-		console.log('light', hsp)
+	if (hsp > 198) {
+		// console.log('light', hsp)
 		return colors.dark
 	}
 	else {
-		console.log('dark', hsp)
+		// console.log('dark', hsp)
 		return colors.light
 	}
 }
