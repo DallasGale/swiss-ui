@@ -150,19 +150,25 @@ hs.width = '100%';
 hs.padding = '1rem';
 hs.textAlign = 'right';
 hs.right = 0;
-var radios = "\n  <form>\n    <label for=\"radio-accent\">Accent\n    <input name=\"siteMode\" id=\"radio-accent\" type=\"radio\" value=\"Accent\" />\n    \n    <label for=\"radio-negative\">Negative\n    <input name=\"siteMode\" id=\"radio-negative\" type=\"radio\" value=\"Negative\" />\n\n    <label for=\"radio-positive\">Positive\n    <input name=\"siteMode\" id=\"radio-positive\" type=\"radio\" value=\"Positive\" />\n  </form>\n  ";
+var radios = "\n  <form>\n    <label for=\"radio-accent\">Accent\n    <input name=\"siteMode\" id=\"radio-accent\" type=\"radio\" value=\"accent\" />\n    \n    <label for=\"radio-negative\">Negative\n    <input name=\"siteMode\" id=\"radio-negative\" type=\"radio\" value=\"negative\" />\n\n    <label for=\"radio-positive\">Positive\n    <input name=\"siteMode\" id=\"radio-positive\" type=\"radio\" value=\"positive\" />\n  </form>\n  ";
 header.insertAdjacentHTML('beforeend', radios);
 
 document.onreadystatechange = function () {
   if (document.readyState === 'complete') {
-    var _radios = header.querySelectorAll('input'); // console.log(radios)
+    var defaultMode = body.getAttribute('mode');
 
+    var _radios = header.querySelectorAll('input');
 
     _radios.forEach(function (radio) {
-      // console.log(radio)
+      if (radio.value === defaultMode) {
+        console.log(defaultMode + ' matches input with value ' + radio.value);
+        radio.setAttribute('checked', true);
+      }
+
       radio.addEventListener('click', function () {
         // console.log(radio.value)
         body.setAttribute('mode', radio.value.toLowerCase());
+        console.dir(radio);
       });
     });
   }
@@ -208,7 +214,61 @@ var colorPicker = function colorPicker(color) {
 };
 
 exports.colorPicker = colorPicker;
-},{"./constants":"src/js/constants.js"}],"src/js/constants.js":[function(require,module,exports) {
+},{"./constants":"src/js/constants.js"}],"src/_utils/change_observer.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+/**
+ * 
+ * @param {Element} targetNode - document.querySelector('body') or document.getElementById('app)
+ * 
+ * @param {Function} outputFn - Use arrrow unction. eg () => myFunction()
+ */
+var ChangeObserver = function ChangeObserver(targetNode, outputFn) {
+  var config = {
+    attributes: true
+  };
+
+  var callback = function callback(mutationsList) {
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var mutation = _step.value;
+
+        if (mutation.type === 'attributes') {
+          outputFn();
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return != null) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+  };
+
+  var observer = new MutationObserver(callback);
+  observer.observe(targetNode, config);
+};
+
+var _default = ChangeObserver;
+exports.default = _default;
+},{}],"src/js/constants.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -219,6 +279,8 @@ exports.modeTypes = exports.siteTheme = exports.colors = void 0;
 var _helpers = require("./helpers");
 
 var _swissConfig = _interopRequireDefault(require("~/swiss.config.js"));
+
+var _change_observer = _interopRequireDefault(require("../_utils/change_observer"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -278,43 +340,15 @@ function setBackgroundColor() {
 // ?  page with Mutation Observer.
 
 
-var config = {
-  attributes: true
-};
+function handleBodyObserver() {
+  body.style.background = setBackgroundColor();
+  body.style.color = (0, _helpers.colorPicker)(body.style.background);
+}
 
-var callback = function callback(mutationsList) {
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var mutation = _step.value;
-
-      if (mutation.type === 'attributes') {
-        body.style.background = setBackgroundColor();
-        body.style.color = (0, _helpers.colorPicker)(body.style.background); // console.log(`The ${mutation.attributeName} attribute was modified`)
-      }
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return != null) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
-  }
-};
-
-var observer = new MutationObserver(callback);
-observer.observe(body, config); // observe.disconnect()
-},{"./helpers":"src/js/helpers.js","~/swiss.config.js":"swiss.config.js"}],"src/web-components/buttons/_functions.js":[function(require,module,exports) {
+(0, _change_observer.default)(body, function () {
+  return handleBodyObserver();
+});
+},{"./helpers":"src/js/helpers.js","~/swiss.config.js":"swiss.config.js","../_utils/change_observer":"src/_utils/change_observer.js"}],"src/web-components/buttons/_functions.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -388,6 +422,10 @@ var _constants = require("../../js/constants");
 var _helpers = require("../../js/helpers");
 
 var _functions = require("./_functions");
+
+var _change_observer = _interopRequireDefault(require("../../_utils/change_observer"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -530,44 +568,15 @@ function (_HTMLElement) {
     });
 
     shadowRoot.appendChild(template.content.cloneNode(true));
-    var config = {
-      attributes: true
-    };
     var body = document.querySelector('body');
 
-    var callback = function callback(mutationsList) {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = mutationsList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var mutation = _step.value;
-
-          if (mutation.type === 'attributes') {
-            if (body.getAttribute('mode') === 'positive' && _this.getAttribute('mode') === 'positive') {
-              _this.shadowRoot.querySelector('button').style.borderColor = _constants.colors.light;
-            }
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return != null) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
+    function handleBodyObserver() {
+      if (body.getAttribute('mode') === 'positive' && this.getAttribute('mode') === 'positive') {
+        this.shadowRoot.querySelector('button').style.borderColor = _constants.colors.light;
       }
-    };
+    }
 
-    var observer = new MutationObserver(callback);
-    observer.observe(body, config);
+    (0, _change_observer.default)(body, handleBodyObserver);
     return _this;
   }
 
@@ -575,7 +584,7 @@ function (_HTMLElement) {
 }(_wrapNativeSuper(HTMLElement));
 
 customElements.define('swiss-button', SwissButton);
-},{"../../js/constants":"src/js/constants.js","../../js/helpers":"src/js/helpers.js","./_functions":"src/web-components/buttons/_functions.js"}],"src/web-components/buttons/nav_dropdown_item.js":[function(require,module,exports) {
+},{"../../js/constants":"src/js/constants.js","../../js/helpers":"src/js/helpers.js","./_functions":"src/web-components/buttons/_functions.js","../../_utils/change_observer":"src/_utils/change_observer.js"}],"src/web-components/buttons/nav_dropdown_item.js":[function(require,module,exports) {
 "use strict";
 
 var _constants = require("../../js/constants");
@@ -791,7 +800,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59424" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55646" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -1,5 +1,6 @@
 import { colorPicker } from './helpers'
 import UserTheme from '~/swiss.config.js'
+import ChangeObserver from '../_utils/change_observer'
 
 export const colors = {
 	dark: '#000000',
@@ -63,22 +64,9 @@ function setBackgroundColor() {
 // ? Obseve <body /> for mode attr changes and then re-render the
 // ?  page with Mutation Observer.
 
-const config = {
-	attributes: true,
+function handleBodyObserver() {
+	body.style.background = setBackgroundColor()
+	body.style.color = colorPicker(body.style.background)
 }
 
-const callback = (mutationsList) => {
-	for (let mutation of mutationsList) {
-		if (mutation.type === 'attributes') {
-			body.style.background = setBackgroundColor()
-			body.style.color = colorPicker(body.style.background)
-			// console.log(`The ${mutation.attributeName} attribute was modified`)
-		}
-	}
-}
-
-const observer = new MutationObserver(callback)
-
-observer.observe(body, config)
-
-// observe.disconnect()
+ChangeObserver(body, () => handleBodyObserver())

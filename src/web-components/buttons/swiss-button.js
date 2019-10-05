@@ -1,6 +1,7 @@
 import { siteTheme, themeTypes, colors } from '../../js/constants'
 import { colorPicker } from '../../js/helpers'
 import { setButtonBackground, setButtonBorderColor } from './_functions'
+import ChangeObserver from '../../_utils/change_observer'
 
 const { accent } = siteTheme
 
@@ -139,23 +140,16 @@ class SwissButton extends HTMLElement {
 		shadowRoot.appendChild(template.content.cloneNode(true))
 
 
-		const config = {
-			attributes: true,
-		}
+
 		const body = document.querySelector('body')
-		const callback = (mutationsList) => {
-			for (let mutation of mutationsList) {
-				if (mutation.type === 'attributes') {
-					if (body.getAttribute('mode') === 'positive' && this.getAttribute('mode') === 'positive') {
-						this.shadowRoot.querySelector('button').style.borderColor = colors.light
-					}
-				}
+		function handleBodyObserver() {
+			if (body.getAttribute('mode') === 'positive' && this.getAttribute('mode') === 'positive') {
+				this.shadowRoot.querySelector('button').style.borderColor = colors.light
 			}
 		}
 
-		const observer = new MutationObserver(callback)
+		ChangeObserver(body, handleBodyObserver)
 
-		observer.observe(body, config)
 
 	}
 }

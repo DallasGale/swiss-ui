@@ -1,5 +1,6 @@
 import { colors } from './constants'
 
+
 export const colorPicker = (color) => {
 	// Variables for red, green, blue values
 	var r, g, b, hsp
