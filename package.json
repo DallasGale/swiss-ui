@@ -8,6 +8,6 @@
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-react-hooks": "^1.7.0",
     "postcss-modules": "^1.4.1",
-    "sass": "^1.22.12"
+    "sass": "^1.23.0"
   }
 }

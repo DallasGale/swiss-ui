@@ -12,6 +12,9 @@ template.innerHTML = `
 `
 
 
+const body = document.querySelector('body')
+
+
 class SwissButton extends HTMLElement {
 
 	constructor() {
@@ -140,17 +143,43 @@ class SwissButton extends HTMLElement {
 		shadowRoot.appendChild(template.content.cloneNode(true))
 
 
+		// * Handle <body /> attr changes and react to them in the DOM
+		// * Update button border colors to match the user chosen mode.
+		// ? ie: if <body mode="accent"... then the <button mode="accent"... will have a border off 'dark'
 
-		const body = document.querySelector('body')
+		const thisButton = this
+		const thisButtonShadow = this.shadowRoot.querySelector('button')
+
 		function handleBodyObserver() {
-			if (body.getAttribute('mode') === 'positive' && this.getAttribute('mode') === 'positive') {
-				this.shadowRoot.querySelector('button').style.borderColor = colors.light
+			// * Set 'light border' to 'positive button & mode
+			if (body.getAttribute('mode') === 'positive' && thisButton.getAttribute('mode') === 'positive') {
+				thisButtonShadow.style.borderColor = colors.light
+			}
+			// * Set 'default border' to 'positive button & non-positive mode
+			if (body.getAttribute('mode') !== 'positive' && thisButton.getAttribute('mode') === 'positive') {
+				thisButtonShadow.style.borderColor = setButtonBorderColor(siteTheme.mode, buttonMode, accent)
+			}
+
+			// * Set 'dark border' to 'negative button & mode
+			if (body.getAttribute('mode') === 'negative' && thisButton.getAttribute('mode') === 'negative') {
+				thisButtonShadow.style.borderColor = colors.dark
+			}
+			// * Set 'transparent border' to 'positive button & non-positive mode
+			if (body.getAttribute('mode') !== 'negative' && thisButton.getAttribute('mode') === 'negative') {
+				thisButtonShadow.style.borderColor = setButtonBorderColor(siteTheme.mode, buttonMode, accent)
+			}
+
+			// * Set complimentary color to accent button & mode
+			if (body.getAttribute('mode') === 'accent' && thisButton.getAttribute('mode') === 'accent') {
+				thisButtonShadow.style.borderColor = setButtonBorderColor(siteTheme.mode, buttonMode, accent)
+			}
+			// * Set 'transparent border' to 'positive button & non-positive mode
+			if (body.getAttribute('mode') !== 'accent' && thisButton.getAttribute('mode') === 'accent') {
+				thisButtonShadow.style.borderColor = accent
 			}
 		}
 
-		ChangeObserver(body, handleBodyObserver)
-
-
+		ChangeObserver(body, () => handleBodyObserver())
 	}
 }
 
